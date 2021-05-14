@@ -15,7 +15,6 @@ const create_new_jwt = async (refresh_token: string) => {
       { expiresIn: 600 } // 10 Mins
     );
     try {
-      await run_query(rep([new_jwt, user_email], "update_jwt.sql"));
       return { success: true, new_jwt };
     } catch (error) {
       return { success: false, message: "An unknown error occured." };
