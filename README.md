@@ -2,6 +2,8 @@
 
 ### You need to create a new file named '.env' and add the following components to it:
 
+
+
 ```markdown
 | Name  | Purpose |
 | ------------- | ------------- |
