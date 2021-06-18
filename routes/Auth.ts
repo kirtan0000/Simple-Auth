@@ -5,7 +5,7 @@ const passwordHash = require("password-hash");
 const rep = require("../util/replace_sql");
 const run_query = require("../util/run_query");
 import create_new_jwt_new_user from "../auth/create_new_jwt_new_user";
-import send_email from "../util/send_email";
+import send_email from "../util/send_emails/send_email";
 import create_new_jwt from "../auth/create_new_jwt";
 import generate_refresh from "../auth/generate_refresh";
 import check_user_exists from "../auth/check_user_exists";
@@ -42,7 +42,7 @@ router.post("/create-user", async (req: Request, res: Response) => {
         return;
       }
       await run_query(
-        rep([name, email, hashed_pass, user_refresh], "add_user.sql")
+        rep([name, email, hashed_pass, user_refresh], "ADD/add_user.sql")
       );
       send_email(email);
       res.json({

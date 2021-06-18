@@ -3,7 +3,7 @@ const create_new_jwt = async (refresh_token: string) => {
   const rep = require("../util/replace_sql");
   const run_query = require("../util/run_query");
   const enviromentVars = require("dotenv").config().parsed;
-  let user_refresh = await run_query(rep([refresh_token], "get_user_info.sql"));
+  let user_refresh = await run_query(rep([refresh_token], "GET/get_user_info.sql"));
   if (!user_refresh.toString())
     return { success: false, message: "User Not Found!" };
   else {

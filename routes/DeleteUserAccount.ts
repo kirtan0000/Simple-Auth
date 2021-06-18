@@ -4,7 +4,7 @@ import path from "path";
 const passwordHash = require("password-hash");
 const rep = require("../util/replace_sql");
 const run_query = require("../util/run_query");
-import send_email_delete from "../util/send_email_delete";
+import send_email_delete from "../util/send_emails/send_email_delete";
 import generate_refresh from "../auth/generate_refresh";
 import check_user_exists_by_login from "../auth/check_user_exists_by_login";
 
@@ -35,7 +35,7 @@ router.post("/delete-user-account", async (req: Request, res: Response) => {
     });
     return;
   }
-  await run_query(rep([email], "delete_user.sql"));
+  await run_query(rep([email], "DELETE/delete_user.sql"));
   send_email_delete(email);
   res.json({
     success: true,
