@@ -19,6 +19,7 @@ const corsOptions = {
 
 // Routers
 const AuthRouter = require("./routes/Auth");
+const DeleteUserAccountRouter = require("./routes/DeleteUserAccount");
 
 const limiterMessage = {
   success: false,
@@ -38,6 +39,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text());
 app.use("/", AuthRouter);
+app.use("/", DeleteUserAccountRouter);
 app.use("/login", authLimiter);
 app.use("/create-user", authLimiter);
 app.enable("trust proxy");
