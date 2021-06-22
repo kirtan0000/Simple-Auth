@@ -25,12 +25,12 @@ const UpdatePasswordRouter = require("./routes/ChangeUserPassword");
 const limiterMessage = {
   success: false,
   message:
-    "You have been temporarily rate limited. Please come back in 10 minutes.",
+    "You have been temporarily rate limited. Please come back in 30 minutes.",
 };
 
 const authLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 40,
+  windowMs: 30 * 60 * 1000,
+  max: 5,
   message: limiterMessage,
 });
 
@@ -44,6 +44,8 @@ app.use("/", DeleteUserAccountRouter);
 app.use("/", UpdatePasswordRouter);
 app.use("/login", authLimiter);
 app.use("/create-user", authLimiter);
+app.use("/change-user-password", authLimiter);
+app.use("/delete-user-account", authLimiter);
 app.enable("trust proxy");
 app.set("trust proxy", 1);
 
