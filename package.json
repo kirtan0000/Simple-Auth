@@ -1,15 +1,13 @@
 {
   "name": "simple-auth",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Kirtan Magan",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
