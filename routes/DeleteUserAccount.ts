@@ -13,14 +13,20 @@ router.post("/delete-user-account", async (req: Request, res: Response) => {
   const password = req.body?.password;
 
   if (email === undefined || password === undefined) {
-    res.json({ success: false, message: "Missing valid credentials." });
+    res
+      .status(401)
+      .json({
+        success: false,
+        message: "Missing valid credentials.",
+        status_code: 401,
+      });
     return;
   }
 
   const user_exists = await check_user_exists_by_login(email);
 
   if (!user_exists[0]) {
-    res.json({ success: false, message: "The user does not exist." });
+    res.status(404).json({ success: false, message: "The user does not exist.", status_code: 404 });
     return;
   }
 
@@ -29,17 +35,19 @@ router.post("/delete-user-account", async (req: Request, res: Response) => {
   const refresh_token = user_info.refresh;
   const isValid = passwordHash.verify(password, hashedPass);
   if (!isValid) {
-    res.json({
+    res.status(403).json({
       success: false,
       message: "The password is incorrect. Please try again",
+      status_code: 403
     });
     return;
   }
   await run_query(rep([email], "DELETE/delete_user.sql"));
   send_email_delete(email);
-  res.json({
+  res.status(200).json({
     success: true,
     message: "Success!",
+    status_code: 200
   });
 });
 

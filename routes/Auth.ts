@@ -24,7 +24,11 @@ router.post("/create-user", async (req: Request, res: Response) => {
   const name = req.body?.username;
 
   if (email === undefined || password === undefined || name === undefined) {
-    res.json({ success: false, message: "Missing valid credentials." });
+    res.status(401).json({
+      success: false,
+      message: "Missing valid credentials.",
+      status_code: 401,
+    });
     return;
   }
   if (valid_name(name)) {
@@ -38,36 +42,44 @@ router.post("/create-user", async (req: Request, res: Response) => {
       const user_exists = await check_user_exists(email, name);
       const new_jwt = await create_new_jwt_new_user(email, name);
       if (user_exists) {
-        res.json({ success: false, message: "The user already exists." });
+        res.status(409).json({
+          success: false,
+          message: "The user already exists.",
+          status_code: 409,
+        });
         return;
       }
       await run_query(
         rep([name, email, hashed_pass, user_refresh], "ADD/add_user.sql")
       );
       send_email(email);
-      res.json({
+      res.status(200).json({
         success: true,
         message: "Success!",
         data: {
           jwt_token: new_jwt,
           refresh_token: user_refresh,
         },
+        status_code: 200,
       });
     } else if (!validateEmail(email))
-      res.json({
+      res.status(400).json({
         success: false,
         message: "Please enter a valid email.",
+        status_code: 400,
       });
     else if (password.length < 8 || !containsSpecialChars(password))
-      res.json({
+      res.status(400).json({
         success: false,
         message:
           "Please enter a password that is at least 8 characters and has at least 1 special character.",
+        status_code: 400,
       });
   } else
-    res.json({
+    res.status(400).json({
       success: false,
       message: "The username is invalid.",
+      status_code: 400,
     });
 });
 
@@ -76,14 +88,22 @@ router.post("/login", async (req: Request, res: Response) => {
   const password = req.body?.password;
 
   if (email === undefined || password === undefined) {
-    res.json({ success: false, message: "Missing valid credentials." });
+    res.status(401).json({
+      success: false,
+      message: "Missing valid credentials.",
+      status_code: 401,
+    });
     return;
   }
 
   const user_exists = await check_user_exists_by_login(email);
 
   if (!user_exists[0]) {
-    res.json({ success: false, message: "The user does not exist." });
+    res.status(404).json({
+      success: false,
+      message: "The user does not exist.",
+      status_code: 404,
+    });
     return;
   }
 
@@ -92,17 +112,22 @@ router.post("/login", async (req: Request, res: Response) => {
   const refresh_token = user_info.refresh;
   const isValid = passwordHash.verify(password, hashedPass);
   if (!isValid) {
-    res.json({ success: false, message: "The password is incorrect." });
+    res.status(403).json({
+      success: false,
+      message: "The password is incorrect.",
+      status_code: 403,
+    });
     return;
   }
   const new_jwt = await create_new_jwt(refresh_token);
-  res.json({
+  res.status(200).json({
     success: true,
     message: "Success!",
     data: {
       refresh_token: refresh_token,
       jwt_token: new_jwt.new_jwt,
     },
+    status_code: 200,
   });
 });
 

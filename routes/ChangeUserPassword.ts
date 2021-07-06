@@ -20,13 +20,21 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
     password === undefined ||
     new_password === undefined
   ) {
-    res.json({ success: false, message: "Missing valid credentials." });
+    res.status(401).json({
+      success: false,
+      message: "Missing valid credentials.",
+      status_code: 401,
+    });
     return;
   }
 
   const user_exists = await check_user_exists_by_login(email);
   if (!user_exists[0]) {
-    res.json({ success: false, message: "The user does not exist." });
+    res.status(404).json({
+      success: false,
+      message: "The user does not exist.",
+      status_code: 404,
+    });
     return;
   }
 
@@ -34,7 +42,11 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
   const hashedPass = user_info.password;
   const isValid = passwordHash.verify(password, hashedPass);
   if (!isValid) {
-    res.json({ success: false, message: "The password is incorrect." });
+    res.status(403).json({
+      success: false,
+      message: "The password is incorrect.",
+      status: 403,
+    });
     return;
   }
 
@@ -45,15 +57,17 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
       rep([hashed_pass_new, email], "UPDATE/update_user_password.sql")
     );
     send_email_change_password(email);
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Success!",
+      status_code: 200,
     });
   } else if (new_password.length < 8 || !containsSpecialChars(new_password))
-    res.json({
+    res.status(400).json({
       success: false,
       message:
         "Please enter a new password that is at least 8 characters and has at least 1 special character.",
+      status_code: 400,
     });
 });
 
