@@ -26,11 +26,12 @@ const limiterMessage = {
   success: false,
   message:
     "You have been temporarily rate limited. Please come back in 30 minutes.",
+  status_code: 429,
 };
 
 const authLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
-  max: 5,
+  max: 15,
   message: limiterMessage,
 });
 
