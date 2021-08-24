@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 const enviromentVars = require("dotenv").config().parsed;
 
+// Send a welcome email to the new user after they sign up
 const send_email = async (address: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",

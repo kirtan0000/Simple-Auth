@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 const enviromentVars = require("dotenv").config().parsed;
 
+// Notify the user about their password change
 const send_email_change_password = async (address: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",

@@ -10,11 +10,13 @@ import check_user_exists_by_login from "../auth/check_user_exists_by_login";
 
 const { containsSpecialChars, verifyHash } = require("../util/validate");
 
+// The change user password route
 router.post("/change-user-password", async (req: Request, res: Response) => {
   let email = req.body?.email;
   const password = req.body?.password;
   const new_password = req.body?.new_password;
 
+  // If any body data is missing then send an error message
   if (
     email === undefined ||
     password === undefined ||
@@ -28,7 +30,8 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
     return;
   }
 
-  const user_exists = await check_user_exists_by_login(email);
+  const user_exists = await check_user_exists_by_login(email); // Check if the user exists from their email
+
   if (!user_exists[0]) {
     res.status(404).json({
       success: false,
@@ -38,6 +41,7 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
     return;
   }
 
+  // Get the user info and check if the inputted password's hash matches the correct password's hash
   const user_info = user_exists[1][0];
   const hashedPass = user_info.password;
   const isValid = passwordHash.verify(password, hashedPass);
@@ -50,13 +54,14 @@ router.post("/change-user-password", async (req: Request, res: Response) => {
     return;
   }
 
+  // Validate the new password
   if (new_password.length >= 8 && containsSpecialChars(new_password)) {
-    const hashed_pass_new = passwordHash.generate(new_password);
-
+    const hashed_pass_new = passwordHash.generate(new_password); // Generate a new password hash for the user
+    // Update the password hash in the database
     await run_query(
       rep([hashed_pass_new, email], "UPDATE/update_user_password.sql")
     );
-    send_email_change_password(email);
+    send_email_change_password(email); // Notify the user about their password change
     res.status(200).json({
       success: true,
       message: "Success!",

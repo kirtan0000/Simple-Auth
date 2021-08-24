@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 const enviromentVars = require("dotenv").config().parsed;
 
+// Notify the user about their account getting deleted
 const send_email_delete = async (address: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",

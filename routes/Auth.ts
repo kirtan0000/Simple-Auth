@@ -18,11 +18,13 @@ const {
   valid_name,
 } = require("../util/validate");
 
+// The create new user route
 router.post("/create-user", async (req: Request, res: Response) => {
   let email = req.body?.email;
   const password = req.body?.password;
   const name = req.body?.username;
 
+  // If any body data is missing then send an error message
   if (email === undefined || password === undefined || name === undefined) {
     res.status(401).json({
       success: false,
@@ -31,16 +33,19 @@ router.post("/create-user", async (req: Request, res: Response) => {
     });
     return;
   }
+  // If the requested username, email, and password meeet all the requirements (no special characters in username, password must be at least 8 characters, and the password contains special characters) then continue on, else send an error message
   if (valid_name(name)) {
     if (
       validateEmail(email) &&
       password.length >= 8 &&
       containsSpecialChars(password)
     ) {
+      // First check if the user exists already, if not then create a password hash and a refresh token for the user
       const hashed_pass = passwordHash.generate(password);
       const user_refresh = await generate_refresh();
       const user_exists = await check_user_exists(email, name);
       const new_jwt = await create_new_jwt_new_user(email, name);
+      // If the user exists then send an error message
       if (user_exists) {
         res.status(409).json({
           success: false,
@@ -49,10 +54,11 @@ router.post("/create-user", async (req: Request, res: Response) => {
         });
         return;
       }
+      // Add the user to the database
       await run_query(
         rep([name, email, hashed_pass, user_refresh], "ADD/add_user.sql")
       );
-      send_email(email);
+      send_email(email); // Send the welcome email to the user
       res.status(200).json({
         success: true,
         message: "Success!",
@@ -83,10 +89,12 @@ router.post("/create-user", async (req: Request, res: Response) => {
     });
 });
 
+// The login route
 router.post("/login", async (req: Request, res: Response) => {
   const email = req.body?.email;
   const password = req.body?.password;
 
+  // If any body data is missing then send an error message
   if (email === undefined || password === undefined) {
     res.status(401).json({
       success: false,
@@ -96,7 +104,7 @@ router.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
-  const user_exists = await check_user_exists_by_login(email);
+  const user_exists = await check_user_exists_by_login(email); // Check if the user exists from their email
 
   if (!user_exists[0]) {
     res.status(404).json({
@@ -107,6 +115,7 @@ router.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
+  // Get the user info and check if the inputted password's hash matches the correct password's hash
   const user_info = user_exists[1][0];
   const hashedPass = user_info.password;
   const refresh_token = user_info.refresh;
@@ -119,6 +128,7 @@ router.post("/login", async (req: Request, res: Response) => {
     });
     return;
   }
+  // Create a new JWT token and assign it to the user by their refresh token
   const new_jwt = await create_new_jwt(refresh_token);
   res.status(200).json({
     success: true,
