@@ -15,10 +15,12 @@ const send_email_delete = async (address: string) => {
     to: address,
     subject: "Your account for EXAMPLE_SITE has been deleted.",
     html: `<center>
-          <h2> Your account on EXAMPLE_SITE has been permanently deleted. If this wasn't you then you can create the same account but with a different password. </h2>
+          <h2> Your account on EXAMPLE_SITE has been permanently deleted.</h2>
+          <p> If this wasn't you, <a href="https://example.com/create-user/"> then you can make a new one.</a> </p>
       </center>
       `,
   });
+  // For create_user, replace the link with your website URL.
   if (email_sent) return true;
 };
 

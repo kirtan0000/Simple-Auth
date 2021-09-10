@@ -21,6 +21,7 @@ const corsOptions = {
 const AuthRouter = require("./routes/Auth");
 const DeleteUserAccountRouter = require("./routes/DeleteUserAccount");
 const UpdatePasswordRouter = require("./routes/ChangeUserPassword");
+const UpdateUserNameRouter = require("./routes/ChangeUserName");
 
 // The rate limit message displayed on the screen when too many requests are sent to the server
 const limiterMessage = {
@@ -47,6 +48,7 @@ app.use(bodyParser.text());
 app.use("/", AuthRouter);
 app.use("/", DeleteUserAccountRouter);
 app.use("/", UpdatePasswordRouter);
+app.use("/", UpdateUserNameRouter);
 
 // Limit the routes
 app.use("/login", authLimiter);
