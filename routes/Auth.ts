@@ -10,6 +10,7 @@ import create_new_jwt from "../auth/create_new_jwt";
 import generate_refresh from "../auth/generate_refresh";
 import check_user_exists from "../auth/check_user_exists";
 import check_user_exists_by_login from "../auth/check_user_exists_by_login";
+import random_uuid from "../util/uuid";
 
 const {
   validateEmail,
@@ -54,11 +55,20 @@ router.post("/create-user", async (req: Request, res: Response) => {
         });
         return;
       }
+      const vericode = random_uuid(); // Generate a random uuid for the user verification token
+      // Send the verification code to the user
+      await run_query(rep([email, "false", vericode], "ADD/add_veri_code.sql"));
       // Add the user to the database
       await run_query(
-        rep([name, email, hashed_pass, user_refresh], "ADD/add_user.sql")
+        rep(
+          [name, email, hashed_pass, user_refresh, "false"],
+          "ADD/add_user.sql"
+        )
       );
-      send_email(email); // Send the welcome email to the user
+      const fullURL = `${req.protocol}://${req.get(
+        "host"
+      )}/submit-verification`; // The verification token url
+      send_email(email, vericode, fullURL); // Send the welcome email to the user
       res.status(200).json({
         success: true,
         message: "Success!",
@@ -85,6 +95,46 @@ router.post("/create-user", async (req: Request, res: Response) => {
     res.status(400).json({
       success: false,
       message: "The username is invalid.",
+      status_code: 400,
+    });
+});
+
+// The submit verification route
+router.get("/submit-verification", async (req: Request, res: Response) => {
+  // The verification code
+  const code = req.query.code;
+  if (!code) {
+    res.status(400).json({
+      success: false,
+      message: "Please enter a valid code.",
+      status_code: 400,
+    });
+    return;
+  }
+
+  const veri_code_data = await run_query(rep([code], "GET/get_veri_code.sql")); // Get the user info by the verification code
+  if (!veri_code_data.toString()) {
+    res.status(400).json({
+      success: false,
+      message: "Please enter a valid code.",
+      status_code: 400,
+    });
+    return;
+  }
+  const veri_data = veri_code_data[0];
+  if (veri_data.hasExpired == "false") {
+    // Expire the token and make the user valid to log in
+    await run_query(rep([veri_data.email], "UPDATE/set_valid_user.sql"));
+    await run_query(rep([veri_data.email], "UPDATE/expire_code.sql"));
+    res.status(200).json({
+      success: true,
+      message: "Success!",
+      status_code: 200,
+    });
+  } else
+    res.status(400).json({
+      success: false,
+      message: "The code is expired.",
       status_code: 400,
     });
 });
@@ -120,6 +170,17 @@ router.post("/login", async (req: Request, res: Response) => {
   const hashedPass = user_info.password;
   const refresh_token = user_info.refresh;
   const isValid = passwordHash.verify(password, hashedPass);
+  const isValidUser = user_info.is_valid;
+  // If the user has not yet verified their email, tell them to
+  if (isValidUser == "false") {
+    res.status(400).json({
+      success: false,
+      message:
+        "Please verify your email. You can check your inbox to verify it.",
+      status_code: 400,
+    });
+    return;
+  }
   if (!isValid) {
     res.status(403).json({
       success: false,

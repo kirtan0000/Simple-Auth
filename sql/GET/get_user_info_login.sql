@@ -1,6 +1,7 @@
   
 SELECT 
      password,
-     refresh
+     refresh,
+     is_valid
 from users
 WHERE email = ?

@@ -20,7 +20,7 @@ const send_email_change_password = async (address: string) => {
       </center>
       `,
   });
-  // For change_user_password, replace the link with your
+  // For change_user_password, replace the link with your website URL
   if (email_sent) return true;
 };
 
