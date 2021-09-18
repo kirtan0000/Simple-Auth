@@ -4,7 +4,6 @@ import path from "path";
 const passwordHash = require("password-hash");
 const rep = require("../util/replace_sql");
 const run_query = require("../util/run_query");
-import create_new_jwt_new_user from "../auth/create_new_jwt_new_user";
 import send_email from "../util/send_emails/send_email";
 import create_new_jwt from "../auth/create_new_jwt";
 import generate_refresh from "../auth/generate_refresh";
@@ -45,7 +44,6 @@ router.post("/create-user", async (req: Request, res: Response) => {
       const hashed_pass = passwordHash.generate(password);
       const user_refresh = await generate_refresh();
       const user_exists = await check_user_exists(email, name);
-      const new_jwt = await create_new_jwt_new_user(email, name);
       // If the user exists then send an error message
       if (user_exists) {
         res.status(409).json({
@@ -72,10 +70,6 @@ router.post("/create-user", async (req: Request, res: Response) => {
       res.status(200).json({
         success: true,
         message: "Success!",
-        data: {
-          jwt_token: new_jwt,
-          refresh_token: user_refresh,
-        },
         status_code: 200,
       });
     } else if (!validateEmail(email))
