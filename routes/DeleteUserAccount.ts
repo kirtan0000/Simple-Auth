@@ -56,4 +56,4 @@ router.post("/delete-user-account", async (req: Request, res: Response) => {
   });
 });
 
-module.exports = router;
+export default router;

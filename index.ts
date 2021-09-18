@@ -18,10 +18,10 @@ const corsOptions = {
 };
 
 // Routers
-const AuthRouter = require("./routes/Auth");
-const DeleteUserAccountRouter = require("./routes/DeleteUserAccount");
-const UpdatePasswordRouter = require("./routes/ChangeUserPassword");
-const UpdateUserNameRouter = require("./routes/ChangeUserName");
+import AuthRouter from "./routes/Auth";
+import DeleteUserAccountRouter from "./routes/DeleteUserAccount";
+import UpdatePasswordRouter from "./routes/ChangeUserPassword";
+import UpdateUserNameRouter from "./routes/ChangeUserName";
 
 // The rate limit message displayed on the screen when too many requests are sent to the server
 const limiterMessage = {

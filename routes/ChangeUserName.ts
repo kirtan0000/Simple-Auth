@@ -75,4 +75,4 @@ router.post("/change-username", async (req: Request, res: Response) => {
   }
 });
 
-module.exports = router;
+export default router;
