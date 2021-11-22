@@ -1,7 +1,3 @@
-  
-SELECT 
-     password,
-     refresh,
-     is_valid
+SELECT *
 from users
 WHERE email = ?

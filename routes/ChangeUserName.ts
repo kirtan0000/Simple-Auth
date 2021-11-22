@@ -7,6 +7,7 @@ const run_query = require("../util/run_query");
 import send_email_change_username from "../util/send_emails/send_email_change_username";
 import create_new_jwt from "../auth/create_new_jwt";
 import check_user_exists_by_login from "../auth/check_user_exists_by_login";
+import check_user_exists from "../auth/check_user_exists";
 
 const { valid_name } = require("../util/validate");
 
@@ -32,11 +33,32 @@ router.post("/change-username", async (req: Request, res: Response) => {
 
   const user_exists = await check_user_exists_by_login(email); // Check if the user exists from their email
 
+  if (user_exists[1][0].username == new_username) {
+    // If the new name is the same as the old name, throw an error
+    res.status(409).json({
+      success: false,
+      message: "New username can't be same as old one.",
+      status_code: 409,
+    });
+    return;
+  }
+
   if (!user_exists[0]) {
     res.status(404).json({
       success: false,
       message: "The user does not exist.",
       status_code: 404,
+    });
+    return;
+  }
+
+  // Check if user with that name already exists
+  const new_user_already_exists = await check_user_exists("non-existent", new_username); // Had to put "non-existent" because this file also checks if the email exists, but we already know it does
+  if (new_user_already_exists) {
+    res.status(409).json({
+      success: false,
+      message: "A user with this name already exists. Try a different one",
+      status_code: 409,
     });
     return;
   }
