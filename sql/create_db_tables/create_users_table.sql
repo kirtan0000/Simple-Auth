@@ -3,5 +3,6 @@ CREATE TABLE users (
      password text,
      refresh text,
      email text,
-     is_valid text
+     is_valid text,
+     nameLastChanged text DEFAULT "0000000000000"
 )

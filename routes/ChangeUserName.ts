@@ -33,32 +33,12 @@ router.post("/change-username", async (req: Request, res: Response) => {
 
   const user_exists = await check_user_exists_by_login(email); // Check if the user exists from their email
 
-  if (user_exists[1][0].username == new_username) {
-    // If the new name is the same as the old name, throw an error
-    res.status(409).json({
-      success: false,
-      message: "New username can't be same as old one.",
-      status_code: 409,
-    });
-    return;
-  }
-
+  // If user doesn't exist, throw an error
   if (!user_exists[0]) {
     res.status(404).json({
       success: false,
       message: "The user does not exist.",
       status_code: 404,
-    });
-    return;
-  }
-
-  // Check if user with that name already exists
-  const new_user_already_exists = await check_user_exists("non-existent", new_username); // Had to put "non-existent" because this file also checks if the email exists, but we already know it does
-  if (new_user_already_exists) {
-    res.status(409).json({
-      success: false,
-      message: "A user with this name already exists. Try a different one",
-      status_code: 409,
     });
     return;
   }
@@ -78,6 +58,49 @@ router.post("/change-username", async (req: Request, res: Response) => {
     return;
   }
 
+  // If the new name is the same as the old name, throw an error
+  if (user_exists[1][0].username == new_username) {
+    res.status(409).json({
+      success: false,
+      message: "New username can't be same as old one.",
+      status_code: 409,
+    });
+    return;
+  }
+
+  // Check if user with that name already exists
+  const new_user_already_exists = await check_user_exists(
+    "non-existent",
+    new_username
+  ); // Had to put "non-existent" because this file also checks if the email exists, but we already know it does
+  if (new_user_already_exists) {
+    res.status(409).json({
+      success: false,
+      message: "A user with this name already exists. Try a different one",
+      status_code: 409,
+    });
+    return;
+  }
+
+  // Limit the user to 1 name change per WEEK
+  const nameLastChangedDate = user_exists[1][0].nameLastChanged; // Default value: 0000000000000
+  const currentDate = Date.now();
+
+  const hasChangedInLastSevenDays =
+    currentDate - nameLastChangedDate >= 604800000 /* 7 days in unix time */
+      ? false
+      : true;
+
+  if (hasChangedInLastSevenDays) {
+    res.status(409).json({
+      success: false,
+      message:
+        "You have already changed your username in the last 7 days. Please try again later.",
+      status: 409,
+    });
+    return;
+  }
+
   // Validate the new username
   if (valid_name(new_username)) {
     // Update the username in the database
@@ -88,6 +111,9 @@ router.post("/change-username", async (req: Request, res: Response) => {
       message: "Success!",
       status_code: 200,
     });
+    await run_query(
+      rep([currentDate, email], "UPDATE/change_username_date.sql")
+    ); // Actually change the name date in the database
   } else {
     res.status(400).json({
       success: false,
