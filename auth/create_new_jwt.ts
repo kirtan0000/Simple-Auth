@@ -6,7 +6,7 @@ const create_new_jwt = async (refresh_token: string) => {
   const enviromentVars = require("dotenv").config().parsed;
   // Fetch the user refresh token and if not found in database, send error message else create a new JWT token
   let user_refresh = await run_query(rep([refresh_token], "GET/get_user_info.sql"));
-  if (!user_refresh.toString())
+  if (!user_refresh.length)
     return { success: false, message: "User Not Found!" };
   else {
     let user_email = user_refresh[0].email;

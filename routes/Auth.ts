@@ -107,7 +107,7 @@ router.get("/submit-verification", async (req: Request, res: Response) => {
   }
 
   const veri_code_data = await run_query(rep([code], "GET/get_veri_code.sql")); // Get the user info by the verification code
-  if (!veri_code_data.toString()) {
+  if (!veri_code_data.length) {
     res.status(400).json({
       success: false,
       message: "Please enter a valid code.",
