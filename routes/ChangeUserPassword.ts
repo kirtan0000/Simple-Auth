@@ -59,7 +59,7 @@ router.post('/change-user-password', async (req: Request, res: Response) => {
   if (matches_old_password) {
     res.status(409).json({
       success: false,
-      error: 'New password CANNOT be same as old one.',
+      message: 'New password CANNOT be same as old one.',
       status_code: 409
     })
     return
